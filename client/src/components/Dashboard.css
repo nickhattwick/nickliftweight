@@ -1,0 +1,29 @@
+.page-header {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.chart-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 0 5px;
+}
+
+.chart-box {
+    flex: 0 0 calc(33.333% - 40px);
+    height: 300px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #fff;
+    position: relative;
+}
+
+.chart-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
