@@ -5,6 +5,7 @@ const cors = require('cors');
 const session = require('express-session');
 const AWS = require('aws-sdk');
 require('dotenv').config();
+const dynamoDb = new AWS.DynamoDB.DocumentClient({ region: 'us-east-1' });
 
 // Passport configuration for Google OAuth
 require('./passport-setup');
@@ -15,14 +16,13 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors({
   origin: 'http://localhost:3001', // allow to server to accept request from different origin
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true // allow session cookie from browser to pass through
 }));
 
 // Session setup for Express
 app.use(session({
   secret: process.env.SESSION_SECRET, // Secret used to sign the session ID cookie, store in .env
-  resave: false,
+  resave: true,
   saveUninitialized: true
 }));
 
@@ -30,15 +30,25 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  // Redirect or respond with an error if not authenticated
+  console.log('User is not authenticated')
+  res.status(401).send('User is not authenticated');
+}
+
 // Define Google Auth Routes
 app.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
 
-app.get('/auth/google/redirect', passport.authenticate('google'), (req, res) => {
-    // Authentication successful, handle the response
-    // For now, we just redirect to a dashboard route
-    res.redirect('http://localhost:3001/dashboard');
+app.get('/auth/google/redirect', passport.authenticate('google'), (req, res, next) => {
+  // Authentication successful, handle the response
+  // For now, we just redirect to a dashboard route
+  req.logIn(req.user, (err) => { // Make sure to pass the user object to req.logIn
+    if (err) { return next(err); }
+    return res.redirect('http://localhost:3001/dashboard');
+  });
 });
 
 app.get('/api/workouts', async (req, res) => {
@@ -61,16 +71,38 @@ app.get('/', (req, res) => {
 
 // Dashboard route (for testing purposes)
 app.get('/dashboard', async (req, res) => {
-  // Check if the user is authenticated
-  if (!req.user) {
-      return res.status(401).send('Not authenticated');
-  }
-
   // Fetch the workout data from DynamoDB
-  const workoutData = await getWorkoutData(req.user.emails[0].value);
+  const workoutData = await getWorkoutData(req.user?.emails[0]?.value);
 
   // Send the data to the client
   res.json(workoutData);
+});
+
+app.post('/log-workout', async (req, res, next) => {
+  console.log(req.sessionStore)
+  const data = req.body;
+
+  const exercises = data.exercises.reduce((acc, exercise) => {
+      acc[exercise.name] = exercise.pairs.map(pair => ({ reps: pair.reps, weight: pair.weight }));
+      return acc;
+  }, {});
+
+  const params = {
+      TableName: 'UserWorkouts',
+      Item: {
+          UserEmail: req.user.emails[0].value,
+          WorkoutDate: data.date,
+          Exercises: exercises
+      }
+  };
+
+  try {
+      await dynamoDb.put(params).promise();
+      res.json({ message: 'Workout logged successfully' });
+  } catch (error) {
+      console.error('Error logging workout:', error);
+      res.status(500).json({ error: 'Error logging workout' });
+  }
 });
 
 // Start the server

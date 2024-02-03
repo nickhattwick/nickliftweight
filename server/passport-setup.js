@@ -12,10 +12,14 @@ passport.use(new GoogleStrategy({
 
 passport.serializeUser((user, done) => {
     // Serialize the user object and store it in the session
+    console.log('Serializing user');
+    console.log(user)
     done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
     // Retrieve the user object from the session
+    console.log('Deserializing user');
     done(null, user);
+    console.log(user)
 });
