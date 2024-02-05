@@ -4,7 +4,7 @@ const Login = () => {
     return (
         <div>
             <h2>Login</h2>
-            <a href="http://localhost:3000/auth/google">
+            <a href={process.env.REACT_APP_SERVER_URL + '/auth/google'}>
                 <button type="button">Sign in with Google</button>
             </a>
         </div>

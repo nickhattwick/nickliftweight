@@ -70,7 +70,7 @@ const LogWorkoutForm = () => {
 
     const onSubmit = async (data) => {    
         try {
-            const response = await fetch('http://localhost:3000/log-workout', {
+            const response = await fetch(process.env.REACT_APP_SERVER_URL + '/log-workout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -78,11 +78,11 @@ const LogWorkoutForm = () => {
                 credentials: 'include',
                 body: JSON.stringify({ ...data }),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-    
+
             const jsonResponse = await response.json();
             console.log(jsonResponse.message);
         } catch (error) {

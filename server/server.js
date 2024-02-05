@@ -15,7 +15,7 @@ const app = express();
 // Middlewares
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'http://localhost:3001', // allow to server to accept request from different origin
+  origin: process.env.REACT_APP_CLIENT_URL, // allow to server to accept request from different origin
   credentials: true // allow session cookie from browser to pass through
 }));
 
@@ -47,7 +47,7 @@ app.get('/auth/google/redirect', passport.authenticate('google'), (req, res, nex
   // For now, we just redirect to a dashboard route
   req.logIn(req.user, (err) => { // Make sure to pass the user object to req.logIn
     if (err) { return next(err); }
-    return res.redirect('http://localhost:3001/dashboard');
+    return res.redirect(`${process.env.REACT_APP_CLIENT_URL}/dashboard`);
   });
 });
 
