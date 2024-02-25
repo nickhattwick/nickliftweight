@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const session = require('express-session');
 const AWS = require('aws-sdk');
+const path = require('path');
 require('dotenv').config();
 const dynamoDb = new AWS.DynamoDB.DocumentClient({ region: 'us-east-1' });
 
@@ -70,7 +71,7 @@ app.get('/', (req, res) => {
 });
 
 // Dashboard route (for testing purposes)
-app.get('/dashboard', async (req, res) => {
+app.get('/dashboard-load', async (req, res) => {
   // Fetch the workout data from DynamoDB
   const workoutData = await getWorkoutData(req.user?.emails[0]?.value);
 
@@ -103,6 +104,13 @@ app.post('/log-workout', async (req, res, next) => {
       console.error('Error logging workout:', error);
       res.status(500).json({ error: 'Error logging workout' });
   }
+});
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../client/build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
 
 // Start the server
@@ -142,3 +150,4 @@ const getWorkoutData = async (email) => {
     console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
   }
 };
+
