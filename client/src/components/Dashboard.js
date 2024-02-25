@@ -21,7 +21,7 @@ const Dashboard = () => {
 
     // Fetch the workout data
     useEffect(() => {
-        fetch(process.env.REACT_APP_SERVER_URL + '/dashboard', {
+        fetch(process.env.REACT_APP_SERVER_URL + '/dashboard-load', {
             credentials: 'include'
         })
             .then(response => response.json())
