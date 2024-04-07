@@ -6,20 +6,13 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "/auth/google/redirect"
 }, (accessToken, refreshToken, profile, done) => {
-    // Find or create a user in your database
     done(null, profile);
 }));
 
 passport.serializeUser((user, done) => {
-    // Serialize the user object and store it in the session
-    console.log('Serializing user');
-    console.log(user)
     done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
-    // Retrieve the user object from the session
-    console.log('Deserializing user');
     done(null, user);
-    console.log(user)
 });

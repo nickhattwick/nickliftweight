@@ -106,6 +106,50 @@ app.post('/log-workout', async (req, res, next) => {
   }
 });
 
+app.post('/add-exercise', async (req, res, next) => {
+  console.log(req.body)
+  const { name, category } = req.body;
+
+  const params = {
+      TableName: 'UserExercises',
+      Item: {
+          'UserEmail': req.user.emails[0].value,
+          'ExerciseName': name,
+          'ExerciseCategory': category
+      }
+  };
+
+  console.log(params)
+
+  try {
+      await dynamoDb.put(params).promise();
+      res.json({ message: 'Exercise added successfully' });
+  } catch (error) {
+      console.error('Error adding new exercise:', error);
+      res.status(500).json({ error: 'Error adding new exercise' });
+  }
+});
+
+app.get('/load-exercises', async (req, res, next) => {
+    console.log("Loading exercises")
+    const params = {
+        TableName: 'UserExercises',
+        KeyConditionExpression: 'UserEmail = :email',
+        ExpressionAttributeValues: {
+            ':email': req.user.emails[0].value
+        }
+    };
+
+    try {
+        const data = await dynamoDb.query(params).promise();
+        console.log(data)
+        res.json({ exercises: data.Items });
+    } catch (error) {
+        console.error('Error loading exercises:', error);
+        res.status(500).json({ error: 'Error loading exercises' });
+    }
+});
+
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
 
