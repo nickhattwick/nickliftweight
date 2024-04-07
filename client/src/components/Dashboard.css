@@ -1,29 +1,115 @@
+/* Base styles */
+body, html {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background-image: url('../../public/dashboard.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  font-family: 'Roboto', sans-serif;
+}
+
 .page-header {
-    text-align: center;
-    margin: 20px 0;
+  text-align: center;
+  margin: 20px 0;
 }
 
+.page-header h1 {
+  color: rgb(88, 255, 249);
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px  1px 0 #000, 1px  1px 0 #000; /* This creates the outline effect */
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+/* Container for the charts */
 .chart-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin: 0 5px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* This will space out the items evenly */
+  gap: 20px; /* Increased gap for spacing between boxes */
+  padding: 20px; /* Add padding around the entire chart area */
 }
 
+/* Individual chart boxes */
 .chart-box {
-    flex: 0 0 calc(33.333% - 40px);
-    height: 300px;
-    margin-bottom: 20px;
-    padding: 20px;
-    background-color: #fff;
-    position: relative;
+  flex-basis: calc(33.333% - 40px); /* Adjusted to account for padding and any margins */
+  max-width: calc(33.333% - 40px);
+  flex-grow: 0;
+  flex-shrink: 0;
+  margin-bottom: 40px; /* Increased margin between charts if they are stacked */
+  height: auto;
+  max-height: 400px;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(100px);
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-.chart-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+.chart-box canvas {
+  max-width: 100%;
+  max-height: 80%;
+}
+
+/* Button styles */
+button {
+  background: #0f3443;
+  border: none;
+  border-radius: 5px;
+  color: #ffffff;
+  padding: 12px 24px;
+  margin: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background: #00b4d8;
+  transform: translateY(-2px);
+}
+
+/* Chart Axes and Labels */
+.chartjs-size-monitor,
+.chartjs-render-monitor {
+  font-family: 'Arial', sans-serif; /* Use a clear, readable font */
+}
+
+.chartjs-render-monitor .chart-labels {
+  color: #ffffff; /* Use white or a light color that shows up against your background */
+  font-size: 14px; /* Increase font size for readability */
+}
+
+/* Tooltips */
+.chartjs-tooltip {
+  background-color: rgba(0, 0, 0, 0.8); /* Ensure tooltips are readable */
+  border-radius: 8px; /* Optional: round the corners for a smoother look */
+  padding: 10px; /* Add some padding inside the tooltip */
+  color: #ffffff;
+  font-size: 12px;
+}
+
+/* Grid Lines */
+.chartjs-render-monitor .chart-grid {
+  color: rgba(8, 8, 8, 0.2); /* Use a subtle white for grid lines */
+  border-width: 1px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .chart-box {
+    flex-basis: calc(50% - 10px); /* Two charts per row on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-box {
+    flex-basis: 100%; /* One chart per row on small screens */
+  }
 }

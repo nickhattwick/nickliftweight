@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import './LogWorkoutForm.css';
+import { useNavigate } from 'react-router-dom';
+import Banner from './Banner';
 
-const Exercise = ({ exercise, exerciseIndex, control, register, removeExercise, categories }) => {
+const Exercise = ({ exercise, exerciseIndex, control, register, removeExercise, categories, handleNewExerciseSubmit, newExerciseName, setNewExerciseName, newExerciseCategory, setNewExerciseCategory }) => {
     const { fields: pairFields, append: appendPair, remove: removePair } = useFieldArray({
         control,
         name: `exercises[${exerciseIndex}].pairs`
     });
+
+    const [isAddingCustomExercise, setIsAddingCustomExercise] = useState(false);
+
+    const handleAddCustomExerciseClick = () => {
+        setIsAddingCustomExercise(true);
+    };
+
+    const handleAddCustomExerciseCancel = () => {
+        setIsAddingCustomExercise(false);
+    };
 
     return (
         <div key={exercise.id} className="exercise-group">
@@ -20,6 +32,25 @@ const Exercise = ({ exercise, exerciseIndex, control, register, removeExercise, 
                     ))}
                 </select>
             </label>
+
+            <button type="button" onClick={handleAddCustomExerciseClick}>
+                Add Custom Exercise
+            </button>
+
+            {isAddingCustomExercise && (
+                <div className="custom-exercise">
+                    <label>
+                        Name:
+                        <input type="text" value={newExerciseName} onChange={(e) => setNewExerciseName(e.target.value)} />
+                    </label>
+                    <label>
+                        Category:
+                        <input type="text" value={newExerciseCategory} onChange={(e) => setNewExerciseCategory(e.target.value)} />
+                    </label>
+                    <button type="button" onClick={handleNewExerciseSubmit}>Add</button>
+                    <button type="button" onClick={handleAddCustomExerciseCancel}>Cancel</button>
+                </div>
+            )}
 
             {pairFields.map((pair, pairIndex) => (
                 <div key={pair.id} className="pair-group">
@@ -48,6 +79,8 @@ const Exercise = ({ exercise, exerciseIndex, control, register, removeExercise, 
 };
 
 const LogWorkoutForm = () => {
+    const navigate = useNavigate();
+
     const { register, control, handleSubmit } = useForm({
         defaultValues: {
             date: new Date().toISOString().substring(0, 10),
@@ -60,13 +93,53 @@ const LogWorkoutForm = () => {
         name: 'exercises'
     });
 
-    const categories = {
+    const [categories, setCategories] = useState({
         'Chest': ['InclineChest', 'ChestPress', 'Flys', 'ShoulderPress'],
-        'Arms': ['Bis', 'TriPress', 'TriPullDown', "LateralRaise"],
+        'Arms': ['Bis', 'TriPress', 'TriPullDown', 'TriExtension', "LateralRaise"],
         'Back': ['PullDown', 'RearDelt', 'Rows'],
         'Legs': ['HipAbductor', 'SeatedLegCurl', 'LegExtension', 'HipAdductor', 'LegPress'],
         'Abs': ['Abdominal', 'BackExtension', 'TorsoRotation']
-    };
+    });
+    useEffect(() => {
+        const loadUserExercises = async () => {
+            try {
+                const response = await fetch(process.env.REACT_APP_SERVER_URL + '/load-exercises', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const jsonResponse = await response.json();
+                                
+                setCategories(prevCategories => {
+                    const updatedCategories = { ...prevCategories };
+                    jsonResponse.exercises.forEach(exercise => {
+                        const category = exercise.ExerciseCategory;
+                        const name = exercise.ExerciseName;
+                        console.log(`category: ${category}, name: ${name}`);
+                        if (!updatedCategories[category]) updatedCategories[category] = [];
+                        if (!updatedCategories[category].includes(name)) {
+                            updatedCategories[category].push(name);
+                        }
+                    });
+                    console.log(updatedCategories);
+                    return updatedCategories;
+                });
+            } catch (error) {
+                console.error('Error loading exercises:', error);
+            }
+        };
+        loadUserExercises();
+    }, []);
+
+    const [newExerciseName, setNewExerciseName] = useState('');
+    const [newExerciseCategory, setNewExerciseCategory] = useState('');
 
     const onSubmit = async (data) => {    
         try {
@@ -85,13 +158,42 @@ const LogWorkoutForm = () => {
 
             const jsonResponse = await response.json();
             console.log(jsonResponse.message);
+
+            navigate('/dashboard');
         } catch (error) {
             console.error('Error logging workout:', error);
         }
     };
 
+    const handleNewExerciseSubmit = async (event) => {
+        event.preventDefault();
+
+        const response = await fetch(process.env.REACT_APP_SERVER_URL + '/add-exercise', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: newExerciseName,
+                category: newExerciseCategory,
+            }),
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            // Reset the form
+            setNewExerciseName('');
+            setNewExerciseCategory('');
+        } else {
+            console.error('Failed to add exercise');
+        }
+    };
+
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="log-workout-form">
+            <button type="button" onClick={() => navigate('/dashboard')}>
+                Back to Dashboard
+            </button>
             <div className="page-header">
                 <h1>Log Workout</h1>
             </div>
@@ -109,6 +211,11 @@ const LogWorkoutForm = () => {
                     register={register}
                     removeExercise={() => removeExercise(index)}
                     categories={categories}
+                    newExerciseName={newExerciseName}
+                    setNewExerciseName={setNewExerciseName}
+                    newExerciseCategory={newExerciseCategory}
+                    setNewExerciseCategory={setNewExerciseCategory}
+                    handleNewExerciseSubmit={handleNewExerciseSubmit}
                 />
             ))}
 

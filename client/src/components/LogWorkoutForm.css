@@ -1,72 +1,104 @@
+body {
+    background-attachment: fixed;
+    font-family: 'Roboto', sans-serif;
+    color: #fff;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
 .log-workout-form {
     display: flex;
     flex-direction: column;
     gap: 24px;
     max-width: 500px;
     margin: 40px auto;
-    font-family: 'Arial', sans-serif;
-    line-height: 1.5;
-}
-
-.log-workout-form label {
-    display: block;
-    margin-bottom: 4px;
+    background: rgba(44, 62, 80, 0.9); /* Semi-transparent blue */
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #000000; /* White text for better contrast */
 }
 
 .log-workout-form input[type="number"],
 .log-workout-form select,
-.log-workout-form input[type="text"] { /* Assuming you use input type="text" for the exercise field */
-    width: calc(100% - 20px); /* Adjust width to account for padding */
-    padding: 10px; /* 10px padding on all sides */
-    margin: 8px 0; /* Added margin for spacing between inputs */
+.log-workout-form input[type="text"] {
+    background: rgba(255, 255, 255, 0.2); /* Lighter background for inputs */
+    color: #0293a7;
+    width: 100%; /* Adjust width to account for padding */
+    padding: 10px;
+    margin: 8px 0;
     border: 1px solid #ddd;
     border-radius: 6px;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.exercise-group {
+  .log-workout-form label {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .exercise-group {
     border: 1px solid #eee;
-    padding: 20px; /* Increased padding for more space */
+    padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    background-color: #fff; /* Added a background color for contrast */
-}
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #e8e5e5de;
+  }
 
-.remove-button, .add-button, .submit-button {
+  .pair-group {
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #c0cad1de;
+  }
+
+  .custom-exercise {
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #797979de;
+  }
+  
+  .remove-button, .add-button, .submit-button {
     padding: 10px 20px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    text-transform: uppercase; /* Style change for better readability */
-    margin: 10px 0; /* Consistent vertical margin */
-}
-
-.remove-button {
-    background-color: #f44336;
+    text-transform: uppercase;
+    margin: 10px 0;
+    transition: background-color 0.3s;
+  }
+  
+  .remove-button {
+    background-color: #666668;
     color: white;
-}
-
-.add-button {
-    background-color: #4CAF50;
+  }
+  
+  .add-button {
+    background-color: #0f3443; /* Dark blue to match the theme */
     color: white;
-}
-
-.submit-button {
+  }
+  
+  .submit-button {
     background-color: #2196F3;
     color: white;
     width: 100%;
-    box-sizing: border-box; /* Ensures padding doesn't affect overall width */
-}
-
-/* Adjustments for smaller screens */
-@media (max-width: 768px) {
-    .log-workout-form label {
-        flex-direction: column;
-        align-items: stretch;
+    box-sizing: border-box;
+  }
+  
+  /* Adjustments for smaller screens */
+  @media (max-width: 768px) {
+    .log-workout-form {
+      width: auto;
+      padding: 15px;
     }
-    
+  
     .remove-button, .add-button, .submit-button {
-        width: 100%;
+      width: calc(100% - 20px); /* Subtract padding from the width */
     }
-}
+  }
+  

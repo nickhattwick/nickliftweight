@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import './App.css';
 import LogWorkoutForm from './components/LogWorkoutForm';
+import Banner from './components/Banner';
 
 function App() {
   return (

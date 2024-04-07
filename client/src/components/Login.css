@@ -1,0 +1,48 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f4f7; /* Assuming a light blue background for any overflow */
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-image: url('../../public/LoginPageBackground.png');
+    background-size: cover;
+    background-position: center;
+    color: #1456e3cb;
+}
+
+h2 {
+    font-size: 3rem; /* Keeps the text size large */
+    color: rgb(88, 255, 249); /* Or any other color that matches your image */
+    text-shadow:
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000; /* This creates the outline effect */
+    margin-bottom: 20px;
+}
+
+.google-signin-btn {
+    background-color: #00b4d8; /* Changed to a blue to match the h2 and the image's scheme */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    font-size: 1.2rem; /* Slightly larger font for the button */
+    font-weight: bold; /* Makes the text bold */
+}
+
+.google-signin-btn:hover {
+    background-color: #0077b6; /* A darker shade of blue for the hover effect */
+    transform: scale(1.05); /* Slightly enlarges the button when hovered for a dynamic effect */
+}
