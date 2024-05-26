@@ -39,16 +39,26 @@ function isAuthenticated(req, res, next) {
 }
 
 // Define Google Auth Routes
-app.get('/auth/google', passport.authenticate('google', {
+app.get('/api/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
 
-app.get('/auth/google/redirect', passport.authenticate('google'), (req, res, next) => {
+app.get('/api/auth/google/redirect', passport.authenticate('google'), (req, res, next) => {
   // Authentication successful, handle the response
   // For now, we just redirect to a dashboard route
   req.logIn(req.user, (err) => { // Make sure to pass the user object to req.logIn
     if (err) { return next(err); }
     return res.redirect(`${process.env.REACT_APP_CLIENT_URL}/dashboard`);
+  });
+});
+
+app.get('/api/auth/google/mobile', passport.authenticate('googleMobile', { scope: ['profile', 'email'] }));
+
+app.get('/api/auth/google/redirect/mobile', passport.authenticate('googleMobile'), (req, res, next) => {
+  req.logIn(req.user, (err) => {
+    if (err) { return next(err); }
+    // Redirect to the deep link
+    return res.redirect(`exp://10.0.0.198:8081/--/dashboard?user=${encodeURIComponent(JSON.stringify(req.user))}`);
   });
 });
 
@@ -66,20 +76,22 @@ app.get('/api/workouts', async (req, res) => {
 });
 
 // Test route for the server
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('Server is running!');
 });
 
 // Dashboard route (for testing purposes)
-app.get('/dashboard-load', async (req, res) => {
+app.get('/api/dashboard-load', async (req, res) => {
   // Fetch the workout data from DynamoDB
+  console.log("Request: ", req)
+  console.log("User data: ", req.user)
   const workoutData = await getWorkoutData(req.user?.emails[0]?.value);
 
   // Send the data to the client
   res.json(workoutData);
 });
 
-app.post('/log-workout', async (req, res, next) => {
+app.post('/api/log-workout', async (req, res, next) => {
   console.log(req.sessionStore)
   const data = req.body;
 
@@ -106,7 +118,7 @@ app.post('/log-workout', async (req, res, next) => {
   }
 });
 
-app.post('/add-exercise', async (req, res, next) => {
+app.post('/api/add-exercise', async (req, res, next) => {
   console.log(req.body)
   const { name, category } = req.body;
 
@@ -130,8 +142,10 @@ app.post('/add-exercise', async (req, res, next) => {
   }
 });
 
-app.get('/load-exercises', async (req, res, next) => {
+app.get('/api/load-exercises', async (req, res, next) => {
     console.log("Loading exercises")
+    console.log("Request: ", req)
+    console.log("User data: ", req.user)
     const params = {
         TableName: 'UserExercises',
         KeyConditionExpression: 'UserEmail = :email',
@@ -139,6 +153,7 @@ app.get('/load-exercises', async (req, res, next) => {
             ':email': req.user.emails[0].value
         }
     };
+    console.log("Excercise params: ", params)
 
     try {
         const data = await dynamoDb.query(params).promise();
