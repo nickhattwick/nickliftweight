@@ -75,6 +75,19 @@ app.get('/api/workouts', async (req, res) => {
   res.json(workoutData);
 });
 
+app.post('/api/workouts/mobile', async (req, res) => {
+  // Check if the user is authenticated
+  if (!req.body.user.email) {
+      return res.status(401).send('No User Data');
+  }
+
+  // Fetch the workout data from DynamoDB
+  const workoutData = await getWorkoutData(req.body.user.email);
+
+  // Send the data to the client
+  res.json(workoutData);
+});
+
 // Test route for the server
 app.get('/api', (req, res) => {
   res.send('Server is running!');
@@ -86,6 +99,14 @@ app.get('/api/dashboard-load', async (req, res) => {
   console.log("Request: ", req)
   console.log("User data: ", req.user)
   const workoutData = await getWorkoutData(req.user?.emails[0]?.value);
+
+  // Send the data to the client
+  res.json(workoutData);
+});
+
+app.get('/api/dashboard-load/mobile', async (req, res) => {
+  // Fetch the workout data from DynamoDB
+  const workoutData = await getWorkoutData(req.body.user.email);
 
   // Send the data to the client
   res.json(workoutData);
@@ -104,6 +125,33 @@ app.post('/api/log-workout', async (req, res, next) => {
       TableName: 'UserWorkouts',
       Item: {
           UserEmail: req.user.emails[0].value,
+          WorkoutDate: data.date,
+          Exercises: exercises
+      }
+  };
+
+  try {
+      await dynamoDb.put(params).promise();
+      res.json({ message: 'Workout logged successfully' });
+  } catch (error) {
+      console.error('Error logging workout:', error);
+      res.status(500).json({ error: 'Error logging workout' });
+  }
+});
+
+app.post('/api/log-workout/mobile', async (req, res, next) => {
+  console.log(req.sessionStore)
+  const data = req.body;
+
+  const exercises = data.exercises.reduce((acc, exercise) => {
+      acc[exercise.name] = exercise.pairs.map(pair => ({ reps: pair.reps, weight: pair.weight }));
+      return acc;
+  }, {});
+
+  const params = {
+      TableName: 'UserWorkouts',
+      Item: {
+          UserEmail: data.user.email,
           WorkoutDate: data.date,
           Exercises: exercises
       }
@@ -143,9 +191,6 @@ app.post('/api/add-exercise', async (req, res, next) => {
 });
 
 app.get('/api/load-exercises', async (req, res, next) => {
-    console.log("Loading exercises")
-    console.log("Request: ", req)
-    console.log("User data: ", req.user)
     const params = {
         TableName: 'UserExercises',
         KeyConditionExpression: 'UserEmail = :email',
@@ -163,6 +208,26 @@ app.get('/api/load-exercises', async (req, res, next) => {
         console.error('Error loading exercises:', error);
         res.status(500).json({ error: 'Error loading exercises' });
     }
+});
+
+app.get('/api/load-exercises/mobile', async (req, res, next) => {
+  const params = {
+      TableName: 'UserExercises',
+      KeyConditionExpression: 'UserEmail = :email',
+      ExpressionAttributeValues: {
+          ':email': req.body.user.email
+      }
+  };
+  console.log("Excercise params: ", params)
+
+  try {
+      const data = await dynamoDb.query(params).promise();
+      console.log(data)
+      res.json({ exercises: data.Items });
+  } catch (error) {
+      console.error('Error loading exercises:', error);
+      res.status(500).json({ error: 'Error loading exercises' });
+  }
 });
 
 // Serve static files from the React app
