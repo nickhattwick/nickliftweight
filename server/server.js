@@ -104,8 +104,10 @@ app.get('/api/dashboard-load', async (req, res) => {
   res.json(workoutData);
 });
 
-app.get('/api/dashboard-load/mobile', async (req, res) => {
+app.post('/api/dashboard-load/mobile', async (req, res) => {
   // Fetch the workout data from DynamoDB
+  console.log("handling /api/dashboard-load/mobile");
+  console.log(req.body);
   const workoutData = await getWorkoutData(req.body.user.email);
 
   // Send the data to the client
@@ -141,6 +143,7 @@ app.post('/api/log-workout', async (req, res, next) => {
 
 app.post('/api/log-workout/mobile', async (req, res, next) => {
   console.log(req.sessionStore)
+  console.log(req.body)
   const data = req.body;
 
   const exercises = data.exercises.reduce((acc, exercise) => {
@@ -190,6 +193,30 @@ app.post('/api/add-exercise', async (req, res, next) => {
   }
 });
 
+app.post('/api/add-exercise/mobile', async (req, res, next) => {
+  console.log(req.body)
+  const { user, name, category } = req.body;
+
+  const params = {
+      TableName: 'UserExercises',
+      Item: {
+          'UserEmail': user.email,
+          'ExerciseName': name,
+          'ExerciseCategory': category
+      }
+  };
+
+  console.log(params)
+
+  try {
+      await dynamoDb.put(params).promise();
+      res.json({ message: 'Exercise added successfully' });
+  } catch (error) {
+      console.error('Error adding new exercise:', error);
+      res.status(500).json({ error: 'Error adding new exercise' });
+  }
+});
+
 app.get('/api/load-exercises', async (req, res, next) => {
     const params = {
         TableName: 'UserExercises',
@@ -210,7 +237,9 @@ app.get('/api/load-exercises', async (req, res, next) => {
     }
 });
 
-app.get('/api/load-exercises/mobile', async (req, res, next) => {
+app.post('/api/load-exercises/mobile', async (req, res, next) => {
+  console.log("Handling /api/load-exercises/mobile");
+  console.log(req.body);
   const params = {
       TableName: 'UserExercises',
       KeyConditionExpression: 'UserEmail = :email',
